@@ -1755,8 +1755,7 @@ Overall pattern suggests the operation is being influenced by a mix of demand pr
       const watchCount = rows.filter(r => r.riskLevel === "medium").length;
       const criticalCount = rows.filter(r => r.riskLevel === "high").length;
       const avgRisk = rows.reduce((a,b)=>a+b.riskScore,0) / Math.max(rows.length,1);
-      const topActions = rankActions(rows).slice(0,3).map(x => `- ${x.action}`).join("
-");
+      const topActions = rankActions(rows).slice(0,3).map(x => `- ${x.action}`).join("\n");
       const summary = `
 ${val("dateLabel")} intraday view for ${val("lobName")} shows an average risk score of ${fmt(avgRisk,0)}.
 
@@ -1871,11 +1870,9 @@ Cumulative Negative Gap: ${a.totalNegativeGap}`;
       const headers = Object.keys(rows[0]);
       const esc = v => {
         const s = String(v ?? "");
-        return /[",
-]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
       };
-      return [headers.join(","), ...rows.map(r => headers.map(h => esc(r[h])).join(","))].join("
-");
+      return [headers.join(","), ...rows.map(r => headers.map(h => esc(r[h])).join(","))].join("\n");
     }
 
     function downloadCSV(filename, rows){
@@ -1968,8 +1965,7 @@ Cumulative Negative Gap: ${a.totalNegativeGap}`;
         ["11:30","122","138","445","20","17","73","38","3"],
         ["12:00","118","124","430","18","18","78","28","2"],
         ["12:30","110","108","412","16","18","83","18","2"]
-      ].map(r => r.join(",")).join("
-");
+      ].map(r => r.join(",")).join("\n");
     }
 
     function downloadSampleCSV(){
@@ -1982,9 +1978,7 @@ Cumulative Negative Gap: ${a.totalNegativeGap}`;
     }
 
     function parseCSV(text){
-      const lines = text.replace(/
-/g, "").split("
-").filter(Boolean);
+      const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
       if (!lines.length) return [];
       const split = (line) => {
         const result = [];
@@ -2036,10 +2030,8 @@ Cumulative Negative Gap: ${a.totalNegativeGap}`;
         $("managerSummary").innerText,
         "",
         "Applied Actions",
-        actionsApplied.length ? actionsApplied.map(a => `${a.interval} | ${a.action} | ${a.scope}`).join("
-") : "None"
-      ].join("
-");
+        actionsApplied.length ? actionsApplied.map(a => `${a.interval} | ${a.action} | ${a.scope}`).join("\n") : "None"
+      ].join("\n");
     }
 
     function runEngine(updateBaseline = false){
