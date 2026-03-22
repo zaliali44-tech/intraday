@@ -15,7 +15,7 @@
       --text:#102033;
       --muted:#5f738c;
       --primary:#20c4d8;
-      --primary-dark:#15a9bc;
+      --primary-dark:#159db1;
       --secondary:#3b82f6;
       --green:#16a34a;
       --orange:#d97706;
@@ -153,6 +153,7 @@
       color:#304760;
       text-transform:uppercase;
       letter-spacing:.03em;
+      margin:0;
     }
 
     input, select, textarea{
@@ -190,8 +191,8 @@
       cursor:pointer;
       font-size:13px;
       font-weight:700;
-      color:#113251;
-      background:#fff;
+      color:#15324b;
+      background:#ffffff;
       border:1px solid var(--line-2);
       transition:0.18s ease;
     }
@@ -202,15 +203,32 @@
     }
 
     .btn-primary{
-      color:#fff;
-      background:linear-gradient(180deg, var(--primary), var(--primary-dark));
-      border:1px solid #15acbf;
+      color:#ffffff;
+      background:linear-gradient(180deg, #20c4d8, #159db1);
+      border:1px solid #159db1;
+      box-shadow:0 4px 12px rgba(32,196,216,0.22);
+    }
+
+    .btn-primary:hover{
+      background:linear-gradient(180deg, #1db7ca, #148fa1);
+      color:#ffffff;
     }
 
     .btn-dark{
-      color:#fff;
+      color:#ffffff;
       background:linear-gradient(180deg, #1b4b7c, #163c65);
       border:1px solid #204a75;
+    }
+
+    .btn-dark:hover{
+      color:#ffffff;
+      background:linear-gradient(180deg, #204f82, #184269);
+    }
+
+    .btn:disabled{
+      opacity:0.55;
+      cursor:not-allowed;
+      transform:none;
     }
 
     .hidden{
@@ -464,6 +482,86 @@
       color:#304760;
     }
 
+    .label-row{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:nowrap;
+    }
+
+    .help-icon{
+      width:18px;
+      height:18px;
+      min-width:18px;
+      border-radius:50%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:700;
+      color:#0f2c4d;
+      background:#dff7fb;
+      border:1px solid #9eddea;
+      cursor:pointer;
+      position:relative;
+      line-height:1;
+      user-select:none;
+    }
+
+    .help-icon:hover{
+      background:#c9f0f7;
+    }
+
+    .help-icon:focus{
+      outline:none;
+      box-shadow:0 0 0 3px rgba(32,196,216,0.18);
+    }
+
+    .help-tooltip{
+      position:absolute;
+      left:24px;
+      top:-8px;
+      width:260px;
+      background:rgba(18,27,44,0.97);
+      color:#eaf4ff;
+      border:1px solid rgba(120,155,201,0.35);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:12px;
+      font-weight:600;
+      line-height:1.6;
+      box-shadow:0 10px 30px rgba(0,0,0,0.22);
+      opacity:0;
+      visibility:hidden;
+      transform:translateY(4px);
+      transition:0.18s ease;
+      z-index:20;
+      text-transform:none;
+      letter-spacing:0;
+      pointer-events:none;
+    }
+
+    .help-icon:hover .help-tooltip,
+    .help-icon:focus .help-tooltip,
+    .help-icon.active .help-tooltip{
+      opacity:1;
+      visibility:visible;
+      transform:translateY(0);
+    }
+
+    .help-tooltip::before{
+      content:"";
+      position:absolute;
+      left:-7px;
+      top:16px;
+      width:12px;
+      height:12px;
+      background:rgba(18,27,44,0.97);
+      border-left:1px solid rgba(120,155,201,0.35);
+      border-bottom:1px solid rgba(120,155,201,0.35);
+      transform:rotate(45deg);
+    }
+
     @media (max-width:1300px){
       .kpi-grid{grid-template-columns:repeat(4,1fr)}
     }
@@ -472,6 +570,23 @@
       .grid-6,.grid-5,.grid-4,.grid-3,.grid-2,
       .kpi-grid,.cards-grid,.chart-grid,.formula-grid,.sim-grid{
         grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:768px){
+      .help-tooltip{
+        left:0;
+        top:28px;
+        width:220px;
+      }
+
+      .help-tooltip::before{
+        left:18px;
+        top:-7px;
+        border-left:none;
+        border-bottom:none;
+        border-top:1px solid rgba(120,155,201,0.35);
+        border-right:1px solid rgba(120,155,201,0.35);
       }
     }
   </style>
@@ -508,7 +623,12 @@
 
       <div class="grid-6">
         <div class="field">
-          <label for="intervalSize">Interval Size</label>
+          <div class="label-row">
+            <label for="intervalSize">Interval Size</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Length of each planning interval. Most contact center intraday models use 30-minute intervals, while some teams prefer 15-minute detail.</span>
+            </span>
+          </div>
           <select id="intervalSize">
             <option selected>30</option>
             <option>15</option>
@@ -517,7 +637,12 @@
         </div>
 
         <div class="field">
-          <label for="channelType">Channel Type</label>
+          <div class="label-row">
+            <label for="channelType">Channel Type</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Used for context and future logic. Voice behaves differently from chat, email, or back-office work because service level and handling patterns are different.</span>
+            </span>
+          </div>
           <select id="channelType">
             <option selected>Voice</option>
             <option>Chat</option>
@@ -527,7 +652,12 @@
         </div>
 
         <div class="field">
-          <label for="actionMode">Action Mode</label>
+          <div class="label-row">
+            <label for="actionMode">Action Mode</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Controls how assertive the engine should be when recommending actions. Balanced is usually the safest default for most operations.</span>
+            </span>
+          </div>
           <select id="actionMode">
             <option>Conservative</option>
             <option selected>Balanced</option>
@@ -536,7 +666,12 @@
         </div>
 
         <div class="field">
-          <label for="riskSensitivity">Risk Sensitivity</label>
+          <div class="label-row">
+            <label for="riskSensitivity">Risk Sensitivity</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Changes how strongly the engine reacts to risk drivers like AHT spikes, staffing gaps, and backlog growth. Higher sensitivity means more aggressive alerting.</span>
+            </span>
+          </div>
           <select id="riskSensitivity">
             <option>Low</option>
             <option selected>Medium</option>
@@ -545,19 +680,34 @@
         </div>
 
         <div class="field">
-          <label for="lobName">Queue / LOB</label>
+          <div class="label-row">
+            <label for="lobName">Queue / LOB</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Name of the line of business, queue, or workstream being monitored. This is mostly for clarity in summaries and exports.</span>
+            </span>
+          </div>
           <input id="lobName" type="text" value="Customer Support">
         </div>
 
         <div class="field">
-          <label for="dateLabel">Day Label</label>
+          <div class="label-row">
+            <label for="dateLabel">Day Label</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Friendly label used in the executive summary and downloads. Example: Today, Monday, Peak Sale Day, or 15 Apr 2026.</span>
+            </span>
+          </div>
           <input id="dateLabel" type="text" value="Today">
         </div>
       </div>
 
       <div class="grid-4" style="margin-top:12px;">
         <div class="field">
-          <label for="backlogMode">Backlog Mode</label>
+          <div class="label-row">
+            <label for="backlogMode">Backlog Mode</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Simple Backlog uses one day-level backlog input and distributes pressure across intervals. Interval Backlog lets users enter backlog by interval if they have detailed data.</span>
+            </span>
+          </div>
           <select id="backlogMode">
             <option value="simple" selected>Simple Backlog</option>
             <option value="interval">Interval Backlog</option>
@@ -565,17 +715,32 @@
         </div>
 
         <div class="field simple-backlog">
-          <label for="openingBacklog">Opening Backlog</label>
+          <div class="label-row">
+            <label for="openingBacklog">Opening Backlog</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Total backlog volume at the start of the day or analysis window. Used to estimate queue pressure in simple backlog mode.</span>
+            </span>
+          </div>
           <input id="openingBacklog" type="number" value="18">
         </div>
 
         <div class="field simple-backlog">
-          <label for="currentBacklog">Current Backlog</label>
+          <div class="label-row">
+            <label for="currentBacklog">Current Backlog</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Current open queue or pending workload. In simple backlog mode, the engine uses this together with opening backlog to distribute pressure through the day.</span>
+            </span>
+          </div>
           <input id="currentBacklog" type="number" value="34">
         </div>
 
         <div class="field simple-backlog">
-          <label for="recoveryPerInterval">Recovery Capacity / Interval</label>
+          <div class="label-row">
+            <label for="recoveryPerInterval">Recovery Capacity / Interval</label>
+            <span class="help-icon" tabindex="0">?
+              <span class="help-tooltip">Estimated backlog recovery volume that can be cleared each interval under stable conditions. This helps the tool decide whether backlog is recoverable or worsening.</span>
+            </span>
+          </div>
           <input id="recoveryPerInterval" type="number" value="4">
         </div>
       </div>
@@ -604,88 +769,186 @@
         <div class="details-body">
           <div class="grid-4">
             <div class="field">
-              <label for="targetSLA">Target SLA %</label>
+              <div class="label-row">
+                <label for="targetSLA">Target SLA %</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Service level target expected for the interval. Example: 80 means the engine compares actual performance against an 80% SLA goal.</span>
+                </span>
+              </div>
               <input id="targetSLA" type="number" value="80">
             </div>
+
             <div class="field">
-              <label for="slaAnswerTime">SLA Answer Time Sec</label>
+              <div class="label-row">
+                <label for="slaAnswerTime">SLA Answer Time Sec</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Reference answer time attached to the SLA goal. It is included for user clarity and future extensions even if not fully used in the current risk scoring.</span>
+                </span>
+              </div>
               <input id="slaAnswerTime" type="number" value="20">
             </div>
+
             <div class="field">
-              <label for="targetAHT">Target AHT Sec</label>
+              <div class="label-row">
+                <label for="targetAHT">Target AHT Sec</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Expected target handle time in seconds. The engine compares actual AHT against this target to identify productivity pressure.</span>
+                </span>
+              </div>
               <input id="targetAHT" type="number" value="420">
             </div>
+
             <div class="field">
-              <label for="maxOccupancy">Max Occupancy %</label>
+              <div class="label-row">
+                <label for="maxOccupancy">Max Occupancy %</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Maximum comfortable occupancy level. If required HC is too close to or above available HC, the engine treats that as additional operational risk.</span>
+                </span>
+              </div>
               <input id="maxOccupancy" type="number" value="90">
             </div>
 
             <div class="field">
-              <label for="backlogWarn">Backlog Warning</label>
+              <div class="label-row">
+                <label for="backlogWarn">Backlog Warning</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Backlog level at which the engine starts treating queue pressure as a warning signal.</span>
+                </span>
+              </div>
               <input id="backlogWarn" type="number" value="20">
             </div>
+
             <div class="field">
-              <label for="backlogCritical">Backlog Critical</label>
+              <div class="label-row">
+                <label for="backlogCritical">Backlog Critical</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Backlog level at which the queue is treated as critically pressured and heavily impacts the risk score.</span>
+                </span>
+              </div>
               <input id="backlogCritical" type="number" value="40">
             </div>
+
             <div class="field">
-              <label for="volumeSpikeThreshold">Volume Variance Trigger %</label>
+              <div class="label-row">
+                <label for="volumeSpikeThreshold">Volume Variance Trigger %</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Positive actual-vs-forecast volume variance at which the engine starts treating demand increase as a meaningful risk driver.</span>
+                </span>
+              </div>
               <input id="volumeSpikeThreshold" type="number" value="10">
             </div>
+
             <div class="field">
-              <label for="ahtSpikeThreshold">AHT Variance Trigger %</label>
+              <div class="label-row">
+                <label for="ahtSpikeThreshold">AHT Variance Trigger %</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Positive AHT variance at which the engine starts treating handling inefficiency as a meaningful operational risk.</span>
+                </span>
+              </div>
               <input id="ahtSpikeThreshold" type="number" value="8">
             </div>
 
             <div class="field">
-              <label for="staffGapThreshold">Staff Gap Trigger</label>
+              <div class="label-row">
+                <label for="staffGapThreshold">Staff Gap Trigger</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Minimum negative staffing difference before the engine escalates the issue as a true staffing shortage rather than normal variation.</span>
+                </span>
+              </div>
               <input id="staffGapThreshold" type="number" value="3">
             </div>
+
             <div class="field">
-              <label for="forecastWarn">Forecast Accuracy Warning %</label>
+              <div class="label-row">
+                <label for="forecastWarn">Forecast Accuracy Warning %</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Reference threshold used when deciding whether forecast performance is stable or needs review.</span>
+                </span>
+              </div>
               <input id="forecastWarn" type="number" value="90">
             </div>
+
             <div class="field">
-              <label for="highRiskScore">High Risk Score</label>
+              <div class="label-row">
+                <label for="highRiskScore">High Risk Score</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Score level at which the engine changes an interval from stable to watch or high attention mode.</span>
+                </span>
+              </div>
               <input id="highRiskScore" type="number" value="60">
             </div>
+
             <div class="field">
-              <label for="criticalRiskScore">Critical Risk Score</label>
+              <div class="label-row">
+                <label for="criticalRiskScore">Critical Risk Score</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Score level at which the engine marks the interval as critical and prioritizes stronger intervention.</span>
+                </span>
+              </div>
               <input id="criticalRiskScore" type="number" value="80">
             </div>
           </div>
 
           <div class="grid-5" style="margin-top:14px;">
             <div class="field">
-              <label for="allowOT">Allow OT</label>
+              <div class="label-row">
+                <label for="allowOT">Allow OT</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">If enabled, the engine can recommend overtime as a recovery action where staffing shortage remains material.</span>
+                </span>
+              </div>
               <select id="allowOT">
                 <option selected>Yes</option>
                 <option>No</option>
               </select>
             </div>
+
             <div class="field">
-              <label for="allowBreakMove">Allow Break Movement</label>
+              <div class="label-row">
+                <label for="allowBreakMove">Allow Break Movement</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">If enabled, the engine can recommend shifting breaks to improve interval coverage for a short time window.</span>
+                </span>
+              </div>
               <select id="allowBreakMove">
                 <option selected>Yes</option>
                 <option>No</option>
               </select>
             </div>
+
             <div class="field">
-              <label for="allowOfflinePull">Allow Offline Pull</label>
+              <div class="label-row">
+                <label for="allowOfflinePull">Allow Offline Pull</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">If enabled, the engine can temporarily move offline or auxiliary HC back into live support.</span>
+                </span>
+              </div>
               <select id="allowOfflinePull">
                 <option selected>Yes</option>
                 <option>No</option>
               </select>
             </div>
+
             <div class="field">
-              <label for="allowQueueRebalance">Allow Queue Rebalance</label>
+              <div class="label-row">
+                <label for="allowQueueRebalance">Allow Queue Rebalance</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">If enabled, the engine can recommend queue balancing or workload redistribution to reduce backlog pressure.</span>
+                </span>
+              </div>
               <select id="allowQueueRebalance">
                 <option selected>Yes</option>
                 <option>No</option>
               </select>
             </div>
+
             <div class="field">
-              <label for="allowSMESupport">Allow SME Support</label>
+              <div class="label-row">
+                <label for="allowSMESupport">Allow SME Support</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">If enabled, the engine can recommend SME support for AHT reduction, coaching support, or process stabilization.</span>
+                </span>
+              </div>
               <select id="allowSMESupport">
                 <option selected>Yes</option>
                 <option>No</option>
@@ -702,28 +965,62 @@
         <div class="details-body">
           <div class="grid-4">
             <div class="field">
-              <label for="pullOfflineHC">Pull Offline HC Effect</label>
+              <div class="label-row">
+                <label for="pullOfflineHC">Pull Offline HC Effect</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Number of HC the engine adds back into live support when the Pull Offline action is applied.</span>
+                </span>
+              </div>
               <input id="pullOfflineHC" type="number" value="2">
             </div>
+
             <div class="field">
-              <label for="breakMoveHC">Break Move HC Effect</label>
+              <div class="label-row">
+                <label for="breakMoveHC">Break Move HC Effect</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Estimated HC equivalent gained when breaks are shifted away from the selected interval window.</span>
+                </span>
+              </div>
               <input id="breakMoveHC" type="number" value="1">
             </div>
+
             <div class="field">
-              <label for="otAddHC">OT Added HC</label>
+              <div class="label-row">
+                <label for="otAddHC">OT Added HC</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Number of HC equivalent added when the engine applies an overtime action.</span>
+                </span>
+              </div>
               <input id="otAddHC" type="number" value="2">
             </div>
+
             <div class="field">
-              <label for="smeAhtReduction">SME AHT Reduction Sec</label>
+              <div class="label-row">
+                <label for="smeAhtReduction">SME AHT Reduction Sec</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Estimated AHT improvement in seconds after SME support or guided intervention is applied.</span>
+                </span>
+              </div>
               <input id="smeAhtReduction" type="number" value="20">
             </div>
 
             <div class="field">
-              <label for="queueRebalanceBacklog">Queue Rebalance Backlog Reduction</label>
+              <div class="label-row">
+                <label for="queueRebalanceBacklog">Queue Rebalance Backlog Reduction</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Estimated backlog reduction when work is redistributed or routing is adjusted.</span>
+                </span>
+              </div>
               <input id="queueRebalanceBacklog" type="number" value="6">
             </div>
+
             <div class="field">
-              <label for="defaultApplyScope">Default Apply Scope</label>
+              <div class="label-row">
+                <label for="defaultApplyScope">Default Apply Scope</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Defines whether an action affects only the selected interval or also the next intervals in the forward window.</span>
+                </span>
+              </div>
               <select id="defaultApplyScope">
                 <option value="selected">Selected Interval Only</option>
                 <option value="forward1">Selected + Next 1</option>
@@ -731,12 +1028,24 @@
                 <option value="forward3">Selected + Next 3</option>
               </select>
             </div>
+
             <div class="field">
-              <label for="customForwardWindow">Custom Forward Window</label>
+              <div class="label-row">
+                <label for="customForwardWindow">Custom Forward Window</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Used only when a row scope is set to Custom. The engine applies the action across the selected interval plus this many future intervals.</span>
+                </span>
+              </div>
               <input id="customForwardWindow" type="number" value="2">
             </div>
+
             <div class="field">
-              <label for="backlogRecoveryEffect">Simple Backlog Recovery Boost</label>
+              <div class="label-row">
+                <label for="backlogRecoveryEffect">Simple Backlog Recovery Boost</label>
+                <span class="help-icon" tabindex="0">?
+                  <span class="help-tooltip">Supportive backlog recovery assumption used when the tool is operating in simple backlog mode.</span>
+                </span>
+              </div>
               <input id="backlogRecoveryEffect" type="number" value="4">
             </div>
           </div>
@@ -1921,6 +2230,20 @@ Cumulative Negative Gap: ${a.totalNegativeGap}`;
       el.addEventListener("change", () => {
         if (el.id !== "csvUpload") runEngine();
       });
+    });
+
+    document.addEventListener("click", function(e){
+      document.querySelectorAll(".help-icon.active").forEach(icon => {
+        if (!icon.contains(e.target)) {
+          icon.classList.remove("active");
+        }
+      });
+
+      const helpIcon = e.target.closest(".help-icon");
+      if (helpIcon) {
+        helpIcon.classList.toggle("active");
+        e.stopPropagation();
+      }
     });
 
     resetAssumptions();
