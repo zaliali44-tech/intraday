@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stratos Intraday Action Engine</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#f5f8fc;
+      --panel:#ffffff;
+      --panel-2:#f8fbff;
+      --line:#dbe6f2;
+      --line-2:#c8d8ea;
+      --text:#102033;
+      --muted:#5f738c;
+      --primary:#20c4d8;
+      --primary-dark:#15a9bc;
+      --secondary:#3b82f6;
+      --green:#16a34a;
+      --orange:#d97706;
+      --red:#dc2626;
+      --purple:#7c3aed;
+      --shadow:0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(32,196,216,0.08), transparent 20%),
+        linear-gradient(180deg, #f7fbff 0%, #f3f8fd 100%);
+      color:var(--text);
+    }
+
+    .container{
+      max-width:1440px;
+      margin:0 auto;
+      padding:28px 20px 40px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg, #0f2c4d 0%, #114a73 48%, #147c98 100%);
+      border-radius:24px;
+      padding:26px 28px;
+      color:#fff;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+
+    .hero-top{
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:34px;
+      line-height:1.15;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:980px;
+      color:rgba(255,255,255,0.9);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .pill-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .pill{
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.24);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .panel h2, .panel h3, .panel h4{
+      margin-top:0;
+      color:var(--text);
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .helper{
+      background:#eef7ff;
+      border:1px solid #d7e8f9;
+      border-radius:14px;
+      padding:12px 14px;
+      color:#23425e;
+      font-size:13px;
+      line-height:1.7;
+      margin-top:14px;
+    }
+
+    .grid-6,.grid-5,.grid-4,.grid-3,.grid-2{
+      display:grid;
+      gap:12px;
+    }
+
+    .grid-6{grid-template-columns:repeat(6,1fr)}
+    .grid-5{grid-template-columns:repeat(5,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field label{
+      font-size:12px;
+      font-weight:700;
+      color:#304760;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    input, select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line-2);
+      background:#fff;
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+
+    textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#8fcfe0;
+      box-shadow:0 0 0 3px rgba(32,196,216,0.12);
+    }
+
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:700;
+      color:#113251;
+      background:#fff;
+      border:1px solid var(--line-2);
+      transition:0.18s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      background:#f7fbff;
+    }
+
+    .btn-primary{
+      color:#fff;
+      background:linear-gradient(180deg, var(--primary), var(--primary-dark));
+      border:1px solid #15acbf;
+    }
+
+    .btn-dark{
+      color:#fff;
+      background:linear-gradient(180deg, #1b4b7c, #163c65);
+      border:1px solid #204a75;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    details{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding:14px 16px;
+      font-weight:800;
+      background:#f8fbff;
+      border-bottom:1px solid var(--line);
+    }
+
+    summary::-webkit-details-marker{display:none}
+
+    .details-body{
+      padding:16px;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(8,1fr);
+      gap:12px;
+    }
+
+    .kpi-card{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .kpi-title{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      font-weight:700;
+      margin-bottom:8px;
+      letter-spacing:.04em;
+    }
+
+    .kpi-value{
+      font-size:26px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .kpi-note{
+      font-size:12px;
+      color:#476178;
+      line-height:1.45;
+    }
+
+    .alert-card{
+      border-radius:16px;
+      padding:16px;
+      line-height:1.7;
+      border:1px solid var(--line);
+      background:#f9fcff;
+    }
+
+    .alert-card.low{
+      background:#eefaf1;
+      border-color:#bfe6c8;
+    }
+
+    .alert-card.medium{
+      background:#fff8ea;
+      border-color:#f2d49f;
+    }
+
+    .alert-card.high{
+      background:#fff0f0;
+      border-color:#efb4b4;
+    }
+
+    .alert-title{
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      max-height:580px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      min-width:1680px;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      padding:10px 12px;
+      border-bottom:1px solid #e8eef5;
+      text-align:center;
+      vertical-align:middle;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#f7fbff;
+      color:#46627f;
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:.05em;
+    }
+
+    td input, td select{
+      min-width:78px;
+      padding:8px 8px;
+      border-radius:10px;
+      font-size:13px;
+    }
+
+    .pill-risk{
+      display:inline-block;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .risk-low{
+      background:#eaf8ee;
+      color:#17783e;
+    }
+
+    .risk-medium{
+      background:#fff4db;
+      color:#ab6907;
+    }
+
+    .risk-high{
+      background:#fde8e8;
+      color:#b91c1c;
+    }
+
+    .cards-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .action-card{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .action-meta{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:8px;
+    }
+
+    .action-body{
+      color:#304760;
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .summary-box{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      line-height:1.8;
+      color:#304760;
+      white-space:pre-wrap;
+    }
+
+    .sim-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .sim-box{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .chart-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .chart-card{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .chart-toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .chart-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    canvas{
+      width:100% !important;
+      height:320px !important;
+      background:#fff;
+      border:1px solid #e7eff7;
+      border-radius:12px;
+      padding:8px;
+    }
+
+    .formula-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .formula-card{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      line-height:1.7;
+      color:#304760;
+    }
+
+    @media (max-width:1300px){
+      .kpi-grid{grid-template-columns:repeat(4,1fr)}
+    }
+
+    @media (max-width:1100px){
+      .grid-6,.grid-5,.grid-4,.grid-3,.grid-2,
+      .kpi-grid,.cards-grid,.chart-grid,.formula-grid,.sim-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>Stratos Intraday Action Engine</h1>
+          <p>
+            Real-time WFM control dashboard with hybrid backlog handling, downloadable charts, configurable action strength,
+            and action scope that can apply to one interval or a forward window.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Hybrid Backlog</span>
+            <span class="pill">LSS Charts</span>
+            <span class="pill">Action Simulation</span>
+            <span class="pill">Sample CSV</span>
+            <span class="pill">PNG Export</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Control Inputs</h2>
+          <div class="muted">Use interval data for core operations. Backlog can be handled in simple or interval mode.</div>
+        </div>
+      </div>
+
+      <div class="grid-6">
+        <div class="field">
+          <label for="intervalSize">Interval Size</label>
+          <select id="intervalSize">
+            <option selected>30</option>
+            <option>15</option>
+            <option>60</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="channelType">Channel Type</label>
+          <select id="channelType">
+            <option selected>Voice</option>
+            <option>Chat</option>
+            <option>Email</option>
+            <option>Back Office</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="actionMode">Action Mode</label>
+          <select id="actionMode">
+            <option>Conservative</option>
+            <option selected>Balanced</option>
+            <option>Aggressive</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="riskSensitivity">Risk Sensitivity</label>
+          <select id="riskSensitivity">
+            <option>Low</option>
+            <option selected>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="lobName">Queue / LOB</label>
+          <input id="lobName" type="text" value="Customer Support">
+        </div>
+
+        <div class="field">
+          <label for="dateLabel">Day Label</label>
+          <input id="dateLabel" type="text" value="Today">
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-top:12px;">
+        <div class="field">
+          <label for="backlogMode">Backlog Mode</label>
+          <select id="backlogMode">
+            <option value="simple" selected>Simple Backlog</option>
+            <option value="interval">Interval Backlog</option>
+          </select>
+        </div>
+
+        <div class="field simple-backlog">
+          <label for="openingBacklog">Opening Backlog</label>
+          <input id="openingBacklog" type="number" value="18">
+        </div>
+
+        <div class="field simple-backlog">
+          <label for="currentBacklog">Current Backlog</label>
+          <input id="currentBacklog" type="number" value="34">
+        </div>
+
+        <div class="field simple-backlog">
+          <label for="recoveryPerInterval">Recovery Capacity / Interval</label>
+          <input id="recoveryPerInterval" type="number" value="4">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="loadDummyBtn">Load Dummy Data</button>
+        <button class="btn" id="downloadSampleBtn">Download Sample CSV</button>
+        <label class="btn" for="csvUpload">Upload CSV</label>
+        <input id="csvUpload" type="file" accept=".csv" class="hidden">
+        <button class="btn btn-dark" id="runBtn">Run Engine</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="downloadSummaryBtn">Download Summary</button>
+        <button class="btn" id="downloadIntervalBtn">Export Interval CSV</button>
+      </div>
+
+      <div class="helper">
+        <strong>Hybrid backlog design:</strong><br>
+        In simple mode, backlog is entered once as a day-level control input and distributed into the risk logic.
+        In interval mode, backlog becomes editable in the interval grid for teams that have detailed tracking.
+      </div>
+    </section>
+
+    <section class="panel">
+      <details open>
+        <summary>Advanced Assumptions & Action Rules</summary>
+        <div class="details-body">
+          <div class="grid-4">
+            <div class="field">
+              <label for="targetSLA">Target SLA %</label>
+              <input id="targetSLA" type="number" value="80">
+            </div>
+            <div class="field">
+              <label for="slaAnswerTime">SLA Answer Time Sec</label>
+              <input id="slaAnswerTime" type="number" value="20">
+            </div>
+            <div class="field">
+              <label for="targetAHT">Target AHT Sec</label>
+              <input id="targetAHT" type="number" value="420">
+            </div>
+            <div class="field">
+              <label for="maxOccupancy">Max Occupancy %</label>
+              <input id="maxOccupancy" type="number" value="90">
+            </div>
+
+            <div class="field">
+              <label for="backlogWarn">Backlog Warning</label>
+              <input id="backlogWarn" type="number" value="20">
+            </div>
+            <div class="field">
+              <label for="backlogCritical">Backlog Critical</label>
+              <input id="backlogCritical" type="number" value="40">
+            </div>
+            <div class="field">
+              <label for="volumeSpikeThreshold">Volume Variance Trigger %</label>
+              <input id="volumeSpikeThreshold" type="number" value="10">
+            </div>
+            <div class="field">
+              <label for="ahtSpikeThreshold">AHT Variance Trigger %</label>
+              <input id="ahtSpikeThreshold" type="number" value="8">
+            </div>
+
+            <div class="field">
+              <label for="staffGapThreshold">Staff Gap Trigger</label>
+              <input id="staffGapThreshold" type="number" value="3">
+            </div>
+            <div class="field">
+              <label for="forecastWarn">Forecast Accuracy Warning %</label>
+              <input id="forecastWarn" type="number" value="90">
+            </div>
+            <div class="field">
+              <label for="highRiskScore">High Risk Score</label>
+              <input id="highRiskScore" type="number" value="60">
+            </div>
+            <div class="field">
+              <label for="criticalRiskScore">Critical Risk Score</label>
+              <input id="criticalRiskScore" type="number" value="80">
+            </div>
+          </div>
+
+          <div class="grid-5" style="margin-top:14px;">
+            <div class="field">
+              <label for="allowOT">Allow OT</label>
+              <select id="allowOT">
+                <option selected>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="allowBreakMove">Allow Break Movement</label>
+              <select id="allowBreakMove">
+                <option selected>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="allowOfflinePull">Allow Offline Pull</label>
+              <select id="allowOfflinePull">
+                <option selected>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="allowQueueRebalance">Allow Queue Rebalance</label>
+              <select id="allowQueueRebalance">
+                <option selected>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="allowSMESupport">Allow SME Support</label>
+              <select id="allowSMESupport">
+                <option selected>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <details open>
+        <summary>Action Simulation Controls</summary>
+        <div class="details-body">
+          <div class="grid-4">
+            <div class="field">
+              <label for="pullOfflineHC">Pull Offline HC Effect</label>
+              <input id="pullOfflineHC" type="number" value="2">
+            </div>
+            <div class="field">
+              <label for="breakMoveHC">Break Move HC Effect</label>
+              <input id="breakMoveHC" type="number" value="1">
+            </div>
+            <div class="field">
+              <label for="otAddHC">OT Added HC</label>
+              <input id="otAddHC" type="number" value="2">
+            </div>
+            <div class="field">
+              <label for="smeAhtReduction">SME AHT Reduction Sec</label>
+              <input id="smeAhtReduction" type="number" value="20">
+            </div>
+
+            <div class="field">
+              <label for="queueRebalanceBacklog">Queue Rebalance Backlog Reduction</label>
+              <input id="queueRebalanceBacklog" type="number" value="6">
+            </div>
+            <div class="field">
+              <label for="defaultApplyScope">Default Apply Scope</label>
+              <select id="defaultApplyScope">
+                <option value="selected">Selected Interval Only</option>
+                <option value="forward1">Selected + Next 1</option>
+                <option value="forward2" selected>Selected + Next 2</option>
+                <option value="forward3">Selected + Next 3</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="customForwardWindow">Custom Forward Window</label>
+              <input id="customForwardWindow" type="number" value="2">
+            </div>
+            <div class="field">
+              <label for="backlogRecoveryEffect">Simple Backlog Recovery Boost</label>
+              <input id="backlogRecoveryEffect" type="number" value="4">
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Interval Action Grid</h2>
+          <div class="muted">In simple backlog mode, backlog is auto-distributed. In interval mode, backlog is editable directly.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Interval</th>
+              <th>Forecast Vol</th>
+              <th>Actual Vol</th>
+              <th>Actual AHT</th>
+              <th>Required HC</th>
+              <th>Available HC</th>
+              <th>Actual SLA %</th>
+              <th>Backlog</th>
+              <th>Offline HC</th>
+              <th>Occ %</th>
+              <th>Risk Score</th>
+              <th>Risk</th>
+              <th>Suggested Action</th>
+              <th>Apply Scope</th>
+              <th>Apply</th>
+            </tr>
+          </thead>
+          <tbody id="intervalTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Risk Snapshot</h2>
+      <div class="kpi-grid" id="kpiGrid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Critical Alert</h2>
+      <div id="alertBox" class="alert-card medium"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Recommended Recovery Actions</h2>
+      <div class="cards-grid" id="actionCards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Before vs After Action Simulation</h2>
+      <div class="sim-grid">
+        <div class="sim-box">
+          <h4>Before Action</h4>
+          <div id="beforeBox" class="summary-box"></div>
+        </div>
+        <div class="sim-box">
+          <h4>After Action</h4>
+          <div id="afterBox" class="summary-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="grid-2">
+        <div>
+          <h2>Root Cause Analysis</h2>
+          <div id="rcaBox" class="summary-box"></div>
+        </div>
+        <div>
+          <h2>Executive Summary</h2>
+          <div id="managerSummary" class="summary-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Intraday Trend View</h2>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Forecast vs Actual Volume</h3>
+          <div class="chart-sub">LSS-style demand comparison by interval.</div>
+          <canvas id="volumeChart"></canvas>
+          <div class="chart-toolbar">
+            <button class="btn" data-chart="volumeChart">Download PNG</button>
+            <button class="btn" id="downloadVolumeDataBtn">Download Data</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Required HC vs Available HC</h3>
+          <div class="chart-sub">Coverage gap and staffing pressure.</div>
+          <canvas id="hcChart"></canvas>
+          <div class="chart-toolbar">
+            <button class="btn" data-chart="hcChart">Download PNG</button>
+            <button class="btn" id="downloadHCDataBtn">Download Data</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>SLA vs Target + Backlog</h3>
+          <div class="chart-sub">Service performance and queue pressure.</div>
+          <canvas id="slaChart"></canvas>
+          <div class="chart-toolbar">
+            <button class="btn" data-chart="slaChart">Download PNG</button>
+            <button class="btn" id="downloadSLADataBtn">Download Data</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Risk Score by Interval</h3>
+          <div class="chart-sub">Control-style view with threshold lines.</div>
+          <canvas id="riskChart"></canvas>
+          <div class="chart-toolbar">
+            <button class="btn" data-chart="riskChart">Download PNG</button>
+            <button class="btn" id="downloadRiskDataBtn">Download Data</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Before vs After Action Impact</h3>
+          <div class="chart-sub">Risk, backlog, and staffing impact after actions.</div>
+          <canvas id="impactChart"></canvas>
+          <div class="chart-toolbar">
+            <button class="btn" data-chart="impactChart">Download PNG</button>
+            <button class="btn" id="downloadImpactDataBtn">Download Data</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Formula Glossary</h2>
+      <div class="formula-grid">
+        <div class="formula-card">
+          <strong>Forecast Accuracy %</strong><br><br>
+          100 − (|Actual Volume − Forecast Volume| ÷ Forecast Volume × 100)
+        </div>
+        <div class="formula-card">
+          <strong>Volume Variance %</strong><br><br>
+          (Actual Volume − Forecast Volume) ÷ Forecast Volume × 100
+        </div>
+        <div class="formula-card">
+          <strong>AHT Variance %</strong><br><br>
+          (Actual AHT − Target AHT) ÷ Target AHT × 100
+        </div>
+        <div class="formula-card">
+          <strong>Staffing Gap</strong><br><br>
+          Available HC − Required HC
+        </div>
+        <div class="formula-card">
+          <strong>Occupancy %</strong><br><br>
+          (Required HC ÷ Available HC) × 100
+        </div>
+        <div class="formula-card">
+          <strong>Risk Score</strong><br><br>
+          Weighted score based on volume variance, AHT variance, staffing gap, SLA miss, backlog pressure, and occupancy pressure.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const defaultIntervals = [
+      { interval:"09:00", forecast:120, actual:118, aht:410, required:18, available:19, sla:84, backlog:8, offline:3 },
+      { interval:"09:30", forecast:125, actual:132, aht:425, required:19, available:18, sla:79, backlog:14, offline:3 },
+      { interval:"10:00", forecast:130, actual:148, aht:455, required:21, available:17, sla:71, backlog:24, offline:4 },
+      { interval:"10:30", forecast:135, actual:152, aht:468, required:22, available:16, sla:68, backlog:31, offline:4 },
+      { interval:"11:00", forecast:128, actual:145, aht:452, required:21, available:17, sla:70, backlog:36, offline:3 },
+      { interval:"11:30", forecast:122, actual:138, aht:445, required:20, available:17, sla:73, backlog:38, offline:3 },
+      { interval:"12:00", forecast:118, actual:124, aht:430, required:18, available:18, sla:78, backlog:28, offline:2 },
+      { interval:"12:30", forecast:110, actual:108, aht:412, required:16, available:18, sla:83, backlog:18, offline:2 }
+    ];
+
+    let intervalData = [];
+    let intervalResults = [];
+    let baseResults = [];
+    let charts = {};
+    let actionsApplied = [];
+
+    function $(id){ return document.getElementById(id); }
+
+    function num(id){
+      const v = parseFloat($(id).value);
+      return Number.isFinite(v) ? v : 0;
+    }
+
+    function val(id){
+      return $(id).value;
+    }
+
+    function round(n, d = 1){
+      const p = Math.pow(10, d);
+      return Math.round((n + Number.EPSILON) * p) / p;
+    }
+
+    function fmt(n, d = 1){
+      return round(n, d).toLocaleString(undefined, { minimumFractionDigits:d, maximumFractionDigits:d });
+    }
+
+    function fmt0(n){
+      return Math.round(n).toLocaleString();
+    }
+
+    function clamp(n, min, max){
+      return Math.min(Math.max(n, min), max);
+    }
+
+    function resetAssumptions(){
+      $("intervalSize").value = "30";
+      $("channelType").value = "Voice";
+      $("actionMode").value = "Balanced";
+      $("riskSensitivity").value = "Medium";
+      $("lobName").value = "Customer Support";
+      $("dateLabel").value = "Today";
+      $("backlogMode").value = "simple";
+      $("openingBacklog").value = 18;
+      $("currentBacklog").value = 34;
+      $("recoveryPerInterval").value = 4;
+
+      $("targetSLA").value = 80;
+      $("slaAnswerTime").value = 20;
+      $("targetAHT").value = 420;
+      $("maxOccupancy").value = 90;
+      $("backlogWarn").value = 20;
+      $("backlogCritical").value = 40;
+      $("volumeSpikeThreshold").value = 10;
+      $("ahtSpikeThreshold").value = 8;
+      $("staffGapThreshold").value = 3;
+      $("forecastWarn").value = 90;
+      $("highRiskScore").value = 60;
+      $("criticalRiskScore").value = 80;
+
+      $("allowOT").value = "Yes";
+      $("allowBreakMove").value = "Yes";
+      $("allowOfflinePull").value = "Yes";
+      $("allowQueueRebalance").value = "Yes";
+      $("allowSMESupport").value = "Yes";
+
+      $("pullOfflineHC").value = 2;
+      $("breakMoveHC").value = 1;
+      $("otAddHC").value = 2;
+      $("smeAhtReduction").value = 20;
+      $("queueRebalanceBacklog").value = 6;
+      $("defaultApplyScope").value = "forward2";
+      $("customForwardWindow").value = 2;
+      $("backlogRecoveryEffect").value = 4;
+    }
+
+    function copyDefaultData(){
+      intervalData = defaultIntervals.map(r => ({ ...r }));
+      actionsApplied = [];
+    }
+
+    function toggleBacklogMode(){
+      const simple = val("backlogMode") === "simple";
+      document.querySelectorAll(".simple-backlog").forEach(el => {
+        el.classList.toggle("hidden", !simple);
+      });
+      renderIntervalTable();
+    }
+
+    function distributeSimpleBacklog(){
+      const opening = num("openingBacklog");
+      const current = num("currentBacklog");
+      const totalIntervals = Math.max(intervalData.length, 1);
+      const slope = (current - opening) / Math.max(totalIntervals - 1, 1);
+
+      intervalData = intervalData.map((r, i) => ({
+        ...r,
+        backlog: Math.max(0, round(opening + (slope * i), 0))
+      }));
+    }
+
+    function renderIntervalTable(){
+      const tbody = $("intervalTableBody");
+      const backlogEditable = val("backlogMode") === "interval";
+
+      if (val("backlogMode") === "simple") {
+        distributeSimpleBacklog();
+      }
+
+      tbody.innerHTML = intervalData.map((r, i) => `
+        <tr>
+          <td>${r.interval}</td>
+          <td><input type="number" value="${r.forecast}" data-row="${i}" data-key="forecast"></td>
+          <td><input type="number" value="${r.actual}" data-row="${i}" data-key="actual"></td>
+          <td><input type="number" value="${r.aht}" data-row="${i}" data-key="aht"></td>
+          <td><input type="number" value="${r.required}" data-row="${i}" data-key="required"></td>
+          <td><input type="number" value="${r.available}" data-row="${i}" data-key="available"></td>
+          <td><input type="number" value="${r.sla}" data-row="${i}" data-key="sla"></td>
+          <td>${
+            backlogEditable
+              ? `<input type="number" value="${r.backlog}" data-row="${i}" data-key="backlog">`
+              : `<span>${fmt0(r.backlog)}</span>`
+          }</td>
+          <td><input type="number" value="${r.offline}" data-row="${i}" data-key="offline"></td>
+          <td id="occ-${i}">-</td>
+          <td id="riskscore-${i}">-</td>
+          <td id="riskpill-${i}">-</td>
+          <td id="action-${i}" style="text-align:left">-</td>
+          <td>
+            <select data-scope="${i}">
+              <option value="selected">Selected Only</option>
+              <option value="forward1">+ Next 1</option>
+              <option value="forward2" selected>+ Next 2</option>
+              <option value="forward3">+ Next 3</option>
+              <option value="custom">Custom</option>
+            </select>
+          </td>
+          <td><button class="btn" data-apply="${i}">Apply</button></td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll("input").forEach(inp => {
+        inp.addEventListener("input", (e) => {
+          const idx = Number(e.target.dataset.row);
+          const key = e.target.dataset.key;
+          const value = parseFloat(e.target.value);
+          intervalData[idx][key] = Number.isFinite(value) ? value : 0;
+        });
+      });
+
+      tbody.querySelectorAll("[data-apply]").forEach(btn => {
+        btn.addEventListener("click", () => applyRecommendedAction(Number(btn.dataset.apply)));
+      });
+
+      tbody.querySelectorAll("[data-scope]").forEach(sel => {
+        sel.value = val("defaultApplyScope");
+      });
+    }
+
+    function getSensitivityWeights(){
+      const sensitivity = val("riskSensitivity");
+      if (sensitivity === "Low") return {vol:0.9,aht:0.9,gap:0.9,sla:0.9,backlog:0.9,occ:0.9};
+      if (sensitivity === "High") return {vol:1.15,aht:1.15,gap:1.15,sla:1.15,backlog:1.15,occ:1.15};
+      return {vol:1,aht:1,gap:1,sla:1,backlog:1,occ:1};
+    }
+
+    function detectActions(row, derived, settings){
+      const actions = [];
+
+      if (derived.staffGap < -settings.staffGapThreshold && settings.allowOfflinePull === "Yes" && row.offline > 0) {
+        actions.push({
+          key:"pull_offline",
+          label:`Pull offline HC`,
+          impact:"Fast staffing recovery"
+        });
+      }
+
+      if (derived.staffGap < -settings.staffGapThreshold && settings.allowBreakMove === "Yes") {
+        actions.push({
+          key:"move_breaks",
+          label:"Move breaks",
+          impact:"Short-term coverage support"
+        });
+      }
+
+      if (derived.backlogRisk >= 1 && settings.allowQueueRebalance === "Yes") {
+        actions.push({
+          key:"queue_rebalance",
+          label:"Queue rebalance",
+          impact:"Backlog stabilization"
+        });
+      }
+
+      if (derived.ahtVariancePct >= settings.ahtSpikeThreshold && settings.allowSMESupport === "Yes") {
+        actions.push({
+          key:"sme_support",
+          label:"SME support",
+          impact:"AHT reduction support"
+        });
+      }
+
+      if (derived.staffGap < -settings.staffGapThreshold && settings.allowOT === "Yes") {
+        actions.push({
+          key:"add_ot",
+          label:"Add OT",
+          impact:"Future interval recovery"
+        });
+      }
+
+      if (!actions.length && derived.riskLevel === "low") {
+        actions.push({
+          key:"monitor",
+          label:"Monitor only",
+          impact:"No immediate action needed"
+        });
+      }
+
+      return actions;
+    }
+
+    function buildDerivedRows(sourceRows){
+      const settings = {
+        targetSLA: num("targetSLA"),
+        targetAHT: num("targetAHT"),
+        maxOccupancy: num("maxOccupancy"),
+        backlogWarn: num("backlogWarn"),
+        backlogCritical: num("backlogCritical"),
+        volumeSpikeThreshold: num("volumeSpikeThreshold"),
+        ahtSpikeThreshold: num("ahtSpikeThreshold"),
+        staffGapThreshold: num("staffGapThreshold"),
+        forecastWarn: num("forecastWarn"),
+        highRiskScore: num("highRiskScore"),
+        criticalRiskScore: num("criticalRiskScore"),
+        allowOT: val("allowOT"),
+        allowBreakMove: val("allowBreakMove"),
+        allowOfflinePull: val("allowOfflinePull"),
+        allowQueueRebalance: val("allowQueueRebalance"),
+        allowSMESupport: val("allowSMESupport")
+      };
+
+      const weights = getSensitivityWeights();
+
+      return sourceRows.map((r, i) => {
+        const volumeVariancePct = r.forecast > 0 ? ((r.actual - r.forecast) / r.forecast) * 100 : 0;
+        const forecastAccuracy = r.forecast > 0 ? 100 - (Math.abs(r.actual - r.forecast) / r.forecast * 100) : 100;
+        const ahtVariancePct = settings.targetAHT > 0 ? ((r.aht - settings.targetAHT) / settings.targetAHT) * 100 : 0;
+        const staffGap = r.available - r.required;
+        const occupancy = r.available > 0 ? (r.required / r.available) * 100 : 0;
+
+        let backlogRisk = 0;
+        if (r.backlog >= settings.backlogCritical) backlogRisk = 2;
+        else if (r.backlog >= settings.backlogWarn) backlogRisk = 1;
+
+        let riskScore = 0;
+        riskScore += Math.max(0, volumeVariancePct) * 1.2 * weights.vol;
+        riskScore += Math.max(0, ahtVariancePct) * 1.4 * weights.aht;
+        riskScore += Math.max(0, Math.abs(Math.min(staffGap, 0))) * 7 * weights.gap;
+        riskScore += Math.max(0, settings.targetSLA - r.sla) * 1.8 * weights.sla;
+        riskScore += backlogRisk === 2 ? 20 * weights.backlog : backlogRisk === 1 ? 10 * weights.backlog : 0;
+        riskScore += Math.max(0, occupancy - settings.maxOccupancy) * 0.8 * weights.occ;
+        riskScore = clamp(riskScore, 0, 100);
+
+        let riskLevel = "low";
+        if (riskScore >= settings.criticalRiskScore) riskLevel = "high";
+        else if (riskScore >= settings.highRiskScore) riskLevel = "medium";
+
+        const actions = detectActions(r, {
+          volumeVariancePct,
+          forecastAccuracy,
+          ahtVariancePct,
+          staffGap,
+          occupancy,
+          backlogRisk,
+          riskScore,
+          riskLevel
+        }, settings);
+
+        const primaryCauses = [];
+        if (volumeVariancePct >= settings.volumeSpikeThreshold) primaryCauses.push("Demand spike");
+        if (ahtVariancePct >= settings.ahtSpikeThreshold) primaryCauses.push("AHT pressure");
+        if (staffGap < -settings.staffGapThreshold) primaryCauses.push("Staffing shortage");
+        if (backlogRisk >= 1) primaryCauses.push("Backlog growth");
+        if (occupancy > settings.maxOccupancy) primaryCauses.push("Occupancy overload");
+        if (!primaryCauses.length && riskLevel === "low") primaryCauses.push("Stable operation");
+
+        return {
+          ...r,
+          index:i,
+          volumeVariancePct,
+          forecastAccuracy,
+          ahtVariancePct,
+          staffGap,
+          occupancy,
+          backlogRisk,
+          riskScore,
+          riskLevel,
+          actions,
+          primaryCauses
+        };
+      });
+    }
+
+    function riskPill(level){
+      if (level === "low") return `<span class="pill-risk risk-low">Stable</span>`;
+      if (level === "medium") return `<span class="pill-risk risk-medium">Watch</span>`;
+      return `<span class="pill-risk risk-high">Critical</span>`;
+    }
+
+    function renderRowOutputs(rows){
+      rows.forEach(r => {
+        $(`occ-${r.index}`).textContent = `${fmt(r.occupancy,1)}%`;
+        $(`riskscore-${r.index}`).textContent = fmt(r.riskScore,0);
+        $(`riskpill-${r.index}`).innerHTML = riskPill(r.riskLevel);
+        $(`action-${r.index}`).textContent = r.actions[0]?.label || "Monitor";
+      });
+    }
+
+    function renderKPIs(rows){
+      const avg = (arr, key) => arr.length ? arr.reduce((a,b)=>a + (b[key] || 0), 0) / arr.length : 0;
+      const current = rows[rows.length - 1] || rows[0];
+      const avgRisk = avg(rows, "riskScore");
+      const totalGap = rows.reduce((a,b)=>a + Math.min(0, b.staffGap), 0);
+      const avgOcc = avg(rows, "occupancy");
+      const maxBacklog = Math.max(...rows.map(r => r.backlog), 0);
+      const avgForecastAcc = avg(rows, "forecastAccuracy");
+      const avgAHTVar = avg(rows, "ahtVariancePct");
+      const recovery = maxBacklog <= num("backlogWarn") ? "Stable" : maxBacklog <= num("backlogCritical") ? "Recoverable" : "At Risk";
+
+      const kpis = [
+        ["Intraday Risk Score", fmt(avgRisk,0), "Average overall risk across intervals"],
+        ["Current SLA", `${fmt(current.sla,1)}%`, "Latest interval SLA"],
+        ["Staffing Gap", fmt(totalGap,0), "Cumulative negative gap only"],
+        ["Occupancy", `${fmt(avgOcc,1)}%`, "Average occupancy"],
+        ["Peak Backlog", fmt0(maxBacklog), "Highest backlog observed"],
+        ["Forecast Accuracy", `${fmt(avgForecastAcc,1)}%`, "Average interval forecast accuracy"],
+        ["AHT Variance", `${fmt(avgAHTVar,1)}%`, "Average AHT variance"],
+        ["Recovery Outlook", recovery, "Expected operational stability"]
+      ];
+
+      $("kpiGrid").innerHTML = kpis.map(([title, value, note]) => `
+        <div class="kpi-card">
+          <div class="kpi-title">${title}</div>
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-note">${note}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderAlert(rows){
+      const worst = [...rows].sort((a,b)=>b.riskScore - a.riskScore)[0];
+      const box = $("alertBox");
+      box.className = `alert-card ${worst.riskLevel}`;
+
+      const title = worst.riskLevel === "high" ? "Critical Risk" : worst.riskLevel === "medium" ? "Watch" : "Stable";
+
+      box.innerHTML = `
+        <div class="alert-title">${title}</div>
+        <div>
+          Highest risk is at <strong>${worst.interval}</strong> with score <strong>${fmt(worst.riskScore,0)}</strong>.
+          Main drivers: <strong>${worst.primaryCauses.join(", ")}</strong>.
+          Top immediate action: <strong>${worst.actions[0]?.label || "Monitor current state"}</strong>.
+        </div>
+      `;
+    }
+
+    function rankActions(rows){
+      const counter = {};
+      const impact = {};
+
+      rows.forEach(r => {
+        r.actions.forEach(a => {
+          counter[a.label] = (counter[a.label] || 0) + 1;
+          impact[a.label] = (impact[a.label] || 0) + r.riskScore;
+        });
+      });
+
+      return Object.keys(counter)
+        .map(k => ({
+          action:k,
+          count:counter[k],
+          impact:impact[k]
+        }))
+        .sort((a,b) => b.impact - a.impact)
+        .slice(0,6);
+    }
+
+    function renderActionCards(rows){
+      const ranked = rankActions(rows);
+      const topRiskRows = rows.filter(r => r.riskLevel !== "low");
+
+      $("actionCards").innerHTML = ranked.length ? ranked.map((r, idx) => {
+        const linked = topRiskRows.filter(x => x.actions.some(a => a.label === r.action)).slice(0,3).map(x => x.interval).join(", ");
+        const urgency = r.impact >= 180 ? "Immediate" : r.impact >= 100 ? "High" : "Moderate";
+
+        return `
+          <div class="action-card">
+            <h4>${idx + 1}. ${r.action}</h4>
+            <div class="action-meta">Urgency: ${urgency} • Triggered in ${r.count} interval(s)</div>
+            <div class="action-body">
+              Most relevant intervals: <strong>${linked || "General"}</strong>
+            </div>
+          </div>
+        `;
+      }).join("") : `
+        <div class="action-card">
+          <h4>No major action required</h4>
+          <div class="action-meta">System stable</div>
+          <div class="action-body">Current operation looks stable based on the thresholds provided.</div>
+        </div>
+      `;
+    }
+
+    function renderRCA(rows){
+      const worst = [...rows].sort((a,b)=>b.riskScore - a.riskScore)[0];
+      const primary = {};
+
+      rows.forEach(r => {
+        r.primaryCauses.forEach(c => {
+          primary[c] = (primary[c] || 0) + r.riskScore;
+        });
+      });
+
+      const ranked = Object.entries(primary).sort((a,b) => b[1] - a[1]).map(x => x[0]);
+
+      const text = `
+Primary cause: ${ranked[0] || "Stable operation"}
+Secondary cause: ${ranked[1] || "No secondary pressure"}
+Contributing factor: ${ranked[2] || "No additional contributor"}
+
+Highest-risk interval is ${worst.interval}. At that point:
+- Volume variance: ${fmt(worst.volumeVariancePct,1)}%
+- AHT variance: ${fmt(worst.ahtVariancePct,1)}%
+- Staffing gap: ${fmt(worst.staffGap,0)}
+- Backlog: ${fmt0(worst.backlog)}
+
+Overall pattern suggests the operation is being influenced by a mix of demand pressure, productivity pressure, and staffing alignment.
+      `.trim();
+
+      $("rcaBox").textContent = text;
+    }
+
+    function renderManagerSummary(rows){
+      const firstCritical = rows.find(r => r.riskLevel === "high");
+      const watchCount = rows.filter(r => r.riskLevel === "medium").length;
+      const criticalCount = rows.filter(r => r.riskLevel === "high").length;
+      const avgRisk = rows.reduce((a,b)=>a+b.riskScore,0) / Math.max(rows.length,1);
+      const topActions = rankActions(rows).slice(0,3).map(x => `- ${x.action}`).join("\n");
+
+      const summary = `
+${val("dateLabel")} intraday view for ${val("lobName")} shows an average risk score of ${fmt(avgRisk,0)}.
+
+${criticalCount > 0
+  ? `Critical pressure starts at ${firstCritical.interval}, with ${criticalCount} critical interval(s) in total.`
+  : `No critical interval was detected, though ${watchCount} watch interval(s) still require monitoring.`}
+
+Top recovery options:
+${topActions || "- Monitor current plan"}
+
+Recommended focus:
+- protect the next peak interval
+- reduce immediate staffing shortfall
+- stabilize backlog before it cascades into later intervals
+- address AHT pressure if it remains elevated after staffing actions
+      `.trim();
+
+      $("managerSummary").textContent = summary;
+    }
+
+    function summarizeResults(rows){
+      const avg = (arr, key) => arr.length ? arr.reduce((a,b)=>a + (b[key] || 0), 0) / arr.length : 0;
+      return {
+        avgRisk: round(avg(rows, "riskScore"), 1),
+        avgSLA: round(avg(rows, "sla"), 1),
+        avgBacklog: round(avg(rows, "backlog"), 1),
+        totalNegativeGap: round(rows.reduce((a,b)=>a + Math.min(0, b.staffGap), 0), 1)
+      };
+    }
+
+    function renderSimulation(beforeRows, afterRows){
+      const b = summarizeResults(beforeRows);
+      const a = summarizeResults(afterRows);
+
+      $("beforeBox").textContent =
+`Average Risk Score: ${b.avgRisk}
+Average SLA: ${b.avgSLA}%
+Average Backlog: ${b.avgBacklog}
+Cumulative Negative Gap: ${b.totalNegativeGap}`;
+
+      $("afterBox").textContent =
+`Average Risk Score: ${a.avgRisk}
+Average SLA: ${a.avgSLA}%
+Average Backlog: ${a.avgBacklog}
+Cumulative Negative Gap: ${a.totalNegativeGap}`;
+    }
+
+    function chartOptions(yTitle, y2Title = null){
+      return {
+        responsive:true,
+        maintainAspectRatio:true,
+        interaction:{ mode:"index", intersect:false },
+        plugins:{
+          legend:{ labels:{ color:"#31485f" } }
+        },
+        scales:{
+          x:{
+            ticks:{ color:"#5f738c", maxRotation:0, autoSkip:true },
+            grid:{ color:"rgba(95,115,140,0.10)" }
+          },
+          y:{
+            beginAtZero:true,
+            title:{ display:true, text:yTitle, color:"#5f738c" },
+            ticks:{ color:"#5f738c" },
+            grid:{ color:"rgba(95,115,140,0.10)" }
+          },
+          ...(y2Title ? {
+            y1:{
+              beginAtZero:true,
+              position:"right",
+              title:{ display:true, text:y2Title, color:"#5f738c" },
+              ticks:{ color:"#5f738c" },
+              grid:{ drawOnChartArea:false }
+            }
+          } : {})
+        }
+      };
+    }
+
+    function destroyCharts(){
+      Object.values(charts).forEach(c => c && c.destroy());
+      charts = {};
+    }
+
+    function buildCharts(beforeRows, afterRows){
+      destroyCharts();
+
+      const labels = beforeRows.map(r => r.interval);
+      const targetSLA = num("targetSLA");
+      const highRisk = num("highRiskScore");
+      const criticalRisk = num("criticalRiskScore");
+
+      charts.volumeChart = new Chart($("volumeChart"), {
+        type:"bar",
+        data:{
+          labels,
+          datasets:[
+            {
+              label:"Forecast",
+              data:beforeRows.map(r => r.forecast),
+              backgroundColor:"rgba(59,130,246,0.75)"
+            },
+            {
+              label:"Actual",
+              data:beforeRows.map(r => r.actual),
+              backgroundColor:"rgba(124,58,237,0.72)"
+            }
+          ]
+        },
+        options:chartOptions("Volume")
+      });
+
+      charts.hcChart = new Chart($("hcChart"), {
+        type:"bar",
+        data:{
+          labels,
+          datasets:[
+            {
+              label:"Required HC",
+              data:beforeRows.map(r => r.required),
+              backgroundColor:"rgba(217,119,6,0.78)"
+            },
+            {
+              label:"Available HC",
+              data:beforeRows.map(r => r.available),
+              backgroundColor:beforeRows.map(r => r.available >= r.required ? "rgba(22,163,74,0.78)" : "rgba(220,38,38,0.72)")
+            }
+          ]
+        },
+        options:chartOptions("HC")
+      });
+
+      charts.slaChart = new Chart($("slaChart"), {
+        type:"line",
+        data:{
+          labels,
+          datasets:[
+            {
+              label:"Actual SLA",
+              data:beforeRows.map(r => r.sla),
+              borderColor:"#16a34a",
+              backgroundColor:"rgba(22,163,74,0.12)",
+              tension:0.25,
+              yAxisID:"y"
+            },
+            {
+              label:"Target SLA",
+              data:beforeRows.map(() => targetSLA),
+              borderColor:"#3b82f6",
+              borderDash:[6,4],
+              tension:0,
+              yAxisID:"y"
+            },
+            {
+              label:"Backlog",
+              data:beforeRows.map(r => r.backlog),
+              borderColor:"#dc2626",
+              backgroundColor:"rgba(220,38,38,0.12)",
+              tension:0.25,
+              yAxisID:"y1"
+            }
+          ]
+        },
+        options:chartOptions("SLA %", "Backlog")
+      });
+
+      charts.riskChart = new Chart($("riskChart"), {
+        type:"bar",
+        data:{
+          labels,
+          datasets:[
+            {
+              label:"Risk Score",
+              data:beforeRows.map(r => r.riskScore),
+              backgroundColor:beforeRows.map(r => r.riskLevel === "high" ? "rgba(220,38,38,0.78)" : r.riskLevel === "medium" ? "rgba(217,119,6,0.76)" : "rgba(22,163,74,0.72)")
+            },
+            {
+              label:"High Risk Threshold",
+              data:beforeRows.map(() => highRisk),
+              type:"line",
+              borderColor:"#f59e0b",
+              borderDash:[6,4],
+              tension:0
+            },
+            {
+              label:"Critical Threshold",
+              data:beforeRows.map(() => criticalRisk),
+              type:"line",
+              borderColor:"#dc2626",
+              borderDash:[2,4],
+              tension:0
+            }
+          ]
+        },
+        options:chartOptions("Risk Score")
+      });
+
+      const b = summarizeResults(beforeRows);
+      const a = summarizeResults(afterRows);
+
+      charts.impactChart = new Chart($("impactChart"), {
+        type:"bar",
+        data:{
+          labels:["Avg Risk","Avg Backlog","Negative Gap"],
+          datasets:[
+            {
+              label:"Before",
+              data:[b.avgRisk, b.avgBacklog, Math.abs(b.totalNegativeGap)],
+              backgroundColor:"rgba(59,130,246,0.74)"
+            },
+            {
+              label:"After",
+              data:[a.avgRisk, a.avgBacklog, Math.abs(a.totalNegativeGap)],
+              backgroundColor:"rgba(22,163,74,0.76)"
+            }
+          ]
+        },
+        options:chartOptions("Impact")
+      });
+    }
+
+    function getChartRows(name, beforeRows, afterRows){
+      const b = summarizeResults(beforeRows);
+      const a = summarizeResults(afterRows);
+
+      if (name === "volume") {
+        return beforeRows.map(r => ({
+          Interval:r.interval,
+          Forecast:r.forecast,
+          Actual:r.actual
+        }));
+      }
+      if (name === "hc") {
+        return beforeRows.map(r => ({
+          Interval:r.interval,
+          Required_HC:r.required,
+          Available_HC:r.available
+        }));
+      }
+      if (name === "sla") {
+        return beforeRows.map(r => ({
+          Interval:r.interval,
+          Actual_SLA:r.sla,
+          Target_SLA:num("targetSLA"),
+          Backlog:r.backlog
+        }));
+      }
+      if (name === "risk") {
+        return beforeRows.map(r => ({
+          Interval:r.interval,
+          Risk_Score:round(r.riskScore,1),
+          High_Risk_Threshold:num("highRiskScore"),
+          Critical_Risk_Threshold:num("criticalRiskScore")
+        }));
+      }
+      return [
+        { Metric:"Avg Risk", Before:b.avgRisk, After:a.avgRisk },
+        { Metric:"Avg Backlog", Before:b.avgBacklog, After:a.avgBacklog },
+        { Metric:"Negative Gap", Before:Math.abs(b.totalNegativeGap), After:Math.abs(a.totalNegativeGap) }
+      ];
+    }
+
+    function csvFromRows(rows){
+      if (!rows || !rows.length) return "No data";
+      const headers = Object.keys(rows[0]);
+      const esc = v => {
+        const s = String(v ?? "");
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      return [headers.join(","), ...rows.map(r => headers.map(h => esc(r[h])).join(","))].join("\n");
+    }
+
+    function downloadCSV(filename, rows){
+      const blob = new Blob([csvFromRows(rows)], {type:"text/csv;charset=utf-8;"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function downloadText(filename, text){
+      const blob = new Blob([text], {type:"text/plain;charset=utf-8;"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function downloadChartPNG(canvasId, fileName){
+      const canvas = $(canvasId);
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png", 1.0);
+      link.download = fileName;
+      link.click();
+    }
+
+    function getScopeCount(scope){
+      if (scope === "selected") return 0;
+      if (scope === "forward1") return 1;
+      if (scope === "forward2") return 2;
+      if (scope === "forward3") return 3;
+      return Math.max(0, Math.round(num("customForwardWindow")));
+    }
+
+    function applyActionToRows(startIndex, effectFn, scopeCount){
+      for (let i = startIndex; i <= Math.min(startIndex + scopeCount, intervalData.length - 1); i++) {
+        effectFn(i);
+      }
+    }
+
+    function applyRecommendedAction(index){
+      if (!intervalResults.length) return;
+      const row = intervalResults[index];
+      const topAction = row.actions[0];
+      if (!topAction) return;
+
+      const scopeEl = document.querySelector(`[data-scope="${index}"]`);
+      const scope = scopeEl ? scopeEl.value : val("defaultApplyScope");
+      const scopeCount = getScopeCount(scope);
+
+      actionsApplied.push({
+        interval:row.interval,
+        action:topAction.label,
+        scope:scope
+      });
+
+      if (topAction.key === "pull_offline") {
+        const amount = Math.max(0, Math.round(num("pullOfflineHC")));
+        applyActionToRows(index, (i) => {
+          const move = Math.min(intervalData[i].offline, amount);
+          intervalData[i].offline -= move;
+          intervalData[i].available += move;
+        }, scopeCount);
+      }
+
+      if (topAction.key === "move_breaks") {
+        const amount = Math.max(0, Math.round(num("breakMoveHC")));
+        applyActionToRows(index, (i) => {
+          intervalData[i].available += amount;
+        }, scopeCount);
+      }
+
+      if (topAction.key === "queue_rebalance") {
+        const reduction = Math.max(0, Math.round(num("queueRebalanceBacklog")));
+        applyActionToRows(index, (i) => {
+          intervalData[i].backlog = Math.max(0, intervalData[i].backlog - reduction);
+        }, scopeCount);
+      }
+
+      if (topAction.key === "sme_support") {
+        const reduction = Math.max(0, Math.round(num("smeAhtReduction")));
+        applyActionToRows(index, (i) => {
+          intervalData[i].aht = Math.max(0, intervalData[i].aht - reduction);
+        }, scopeCount);
+      }
+
+      if (topAction.key === "add_ot") {
+        const addHC = Math.max(0, Math.round(num("otAddHC")));
+        applyActionToRows(index, (i) => {
+          intervalData[i].available += addHC;
+        }, scopeCount);
+      }
+
+      renderIntervalTable();
+      runEngine();
+    }
+
+    function sampleCSV(){
+      return [
+        ["Interval","Forecast Volume","Actual Volume","Actual AHT","Required HC","Available HC","Actual SLA","Backlog","Offline HC"],
+        ["09:00","120","118","410","18","19","84","8","3"],
+        ["09:30","125","132","425","19","18","79","14","3"],
+        ["10:00","130","148","455","21","17","71","24","4"],
+        ["10:30","135","152","468","22","16","68","31","4"],
+        ["11:00","128","145","452","21","17","70","36","3"],
+        ["11:30","122","138","445","20","17","73","38","3"],
+        ["12:00","118","124","430","18","18","78","28","2"],
+        ["12:30","110","108","412","16","18","83","18","2"]
+      ].map(r => r.join(",")).join("\n");
+    }
+
+    function downloadSampleCSV(){
+      const blob = new Blob([sampleCSV()], {type:"text/csv;charset=utf-8;"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "intraday_action_engine_sample.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function parseCSV(text){
+      const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
+      if (!lines.length) return [];
+
+      const split = (line) => {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === "," && !inQuotes) {
+            result.push(current);
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        result.push(current);
+        return result;
+      };
+
+      const headers = split(lines[0]).map(h => h.trim().toLowerCase());
+      const rows = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const vals = split(lines[i]);
+        const row = {};
+        headers.forEach((h, idx) => row[h] = (vals[idx] || "").trim());
+        rows.push({
+          interval: row["interval"] || `Row ${i}`,
+          forecast: Number(row["forecast volume"] || 0),
+          actual: Number(row["actual volume"] || 0),
+          aht: Number(row["actual aht"] || 0),
+          required: Number(row["required hc"] || 0),
+          available: Number(row["available hc"] || 0),
+          sla: Number(row["actual sla"] || 0),
+          backlog: Number(row["backlog"] || 0),
+          offline: Number(row["offline hc"] || 0)
+        });
+      }
+
+      return rows;
+    }
+
+    function fullSummaryText(){
+      return [
+        "Stratos Intraday Action Engine Summary",
+        "",
+        $("alertBox").innerText,
+        "",
+        "RCA",
+        $("rcaBox").innerText,
+        "",
+        "Executive Summary",
+        $("managerSummary").innerText,
+        "",
+        "Applied Actions",
+        actionsApplied.length
+          ? actionsApplied.map(a => `${a.interval} | ${a.action} | ${a.scope}`).join("\n")
+          : "None"
+      ].join("\n");
+    }
+
+    function runEngine(){
+      if (val("backlogMode") === "simple") {
+        distributeSimpleBacklog();
+      }
+
+      baseResults = buildDerivedRows(defaultIntervals.map(r => ({ ...r })));
+      intervalResults = buildDerivedRows(intervalData);
+
+      renderRowOutputs(intervalResults);
+      renderKPIs(intervalResults);
+      renderAlert(intervalResults);
+      renderActionCards(intervalResults);
+      renderRCA(intervalResults);
+      renderManagerSummary(intervalResults);
+      renderSimulation(baseResults, intervalResults);
+      buildCharts(baseResults, intervalResults);
+    }
+
+    document.querySelectorAll('[data-chart]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        downloadChartPNG(btn.dataset.chart, `${btn.dataset.chart}.png`);
+      });
+    });
+
+    $("downloadVolumeDataBtn").addEventListener("click", () => downloadCSV("forecast_vs_actual_volume.csv", getChartRows("volume", baseResults, intervalResults)));
+    $("downloadHCDataBtn").addEventListener("click", () => downloadCSV("required_vs_available_hc.csv", getChartRows("hc", baseResults, intervalResults)));
+    $("downloadSLADataBtn").addEventListener("click", () => downloadCSV("sla_backlog_data.csv", getChartRows("sla", baseResults, intervalResults)));
+    $("downloadRiskDataBtn").addEventListener("click", () => downloadCSV("risk_score_data.csv", getChartRows("risk", baseResults, intervalResults)));
+    $("downloadImpactDataBtn").addEventListener("click", () => downloadCSV("before_after_impact.csv", getChartRows("impact", baseResults, intervalResults)));
+
+    $("loadDummyBtn").addEventListener("click", () => {
+      copyDefaultData();
+      renderIntervalTable();
+      runEngine();
+    });
+
+    $("downloadSampleBtn").addEventListener("click", downloadSampleCSV);
+
+    $("csvUpload").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const parsed = parseCSV(text);
+      if (parsed.length) {
+        intervalData = parsed;
+        actionsApplied = [];
+        renderIntervalTable();
+        runEngine();
+      }
+    });
+
+    $("runBtn").addEventListener("click", runEngine);
+
+    $("resetBtn").addEventListener("click", () => {
+      resetAssumptions();
+      copyDefaultData();
+      toggleBacklogMode();
+      renderIntervalTable();
+      runEngine();
+    });
+
+    $("downloadSummaryBtn").addEventListener("click", () => {
+      downloadText("intraday_action_engine_summary.txt", fullSummaryText());
+    });
+
+    $("downloadIntervalBtn").addEventListener("click", () => {
+      downloadCSV("intraday_interval_results.csv", intervalResults.map(r => ({
+        Interval:r.interval,
+        Forecast_Volume:r.forecast,
+        Actual_Volume:r.actual,
+        Actual_AHT:r.aht,
+        Required_HC:r.required,
+        Available_HC:r.available,
+        Actual_SLA:r.sla,
+        Backlog:r.backlog,
+        Offline_HC:r.offline,
+        Occupancy_Pct:round(r.occupancy,1),
+        Risk_Score:round(r.riskScore,1),
+        Risk_Level:r.riskLevel,
+        Suggested_Action:r.actions[0]?.label || "Monitor"
+      })));
+    });
+
+    $("backlogMode").addEventListener("change", () => {
+      toggleBacklogMode();
+      runEngine();
+    });
+
+    document.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("change", () => {
+        if (el.id !== "csvUpload") runEngine();
+      });
+    });
+
+    resetAssumptions();
+    copyDefaultData();
+    toggleBacklogMode();
+    renderIntervalTable();
+    runEngine();
+  </script>
+</body>
+</html>
