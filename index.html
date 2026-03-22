@@ -652,45 +652,48 @@
       border-right:1px solid rgba(120,155,201,0.35);
     }
   }
-  select{
-  background:#0c1f3a;
-  color:#f4f8ff;
-}
+ /* Clean unified select styling */
 
-select option{
-  background:#0c1f3a;
-  color:#f4f8ff;
-}
-
-select option:checked{
-  background:#1f5fbf;
-  color:#ffffff;
-}
-</style>
-  <style>
-    /* Custom dropdown arrow */
 select{
+  width:100%;
+  padding:11px 40px 11px 12px;
+  border-radius:13px;
+  border:1px solid var(--line-2);
   background:#0c1f3a;
   color:#f4f8ff;
-  padding-right:40px; /* space for arrow */
+  font-size:14px;
+  outline:none;
 
+  /* remove default arrow */
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+
+  /* custom arrow */
   background-image: url("data:image/svg+xml;utf8,<svg fill='%23cfe6ff' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
 }
-  select,
-  option,
-  optgroup {
-    color: #f4f8ff;
-    background: #0c1f3a;
-  }
 
-  select:focus,
-  select:active {
-    color: #f4f8ff;
-    background: #0c1f3a;
-  }
+/* dropdown options */
+select option{
+  background:#0c1f3a;
+  color:#f4f8ff;
+}
+
+/* selected / hover option */
+select option:checked,
+select option:hover{
+  background:#1f5fbf;
+  color:#ffffff;
+}
+
+/* focus state */
+select:focus{
+  border-color:rgba(32,224,255,0.6);
+  box-shadow:0 0 0 3px rgba(32,224,255,0.15);
+}
 
   option:checked,
   option:hover,
